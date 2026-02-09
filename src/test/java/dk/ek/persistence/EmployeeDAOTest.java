@@ -1,9 +1,13 @@
 package dk.ek.persistence;
 
 import jakarta.persistence.EntityManagerFactory;
+import org.checkerframework.checker.units.qual.A;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,24 +26,27 @@ class EmployeeDAOTest {
 
     @BeforeEach
     void init() {
-            // Clean up the database before each test
-            employeeDAO.get().forEach(employee -> employeeDAO.delete(employee));
-            // Create 3 departments for testing
-            for (int i = 1; i <= 3; i++) {
-                Department department = new Department();
-                department.setName("Department " + i);
-                departmentDAO.create(department);
-            }
-
-            // Create 10 employees for testing
-            for (int i = 1; i <= 10; i++) {
+        // Clean up the database before each test
+        employeeDAO.get().forEach(employee -> employeeDAO.delete(employee));
+        departmentDAO.get().forEach(department -> departmentDAO.delete(department));
+        // Create 3 departments for testing with 4 employees in each department
+        for (int i = 1; i <= 3; i++) {
+            Department department = new Department();
+            department.setName("Department " + i);
+            departmentDAO.create(department);
+            for (int j = 1; j <= 4; j++) {
                 Employee employee = new Employee();
-                employee.setName("Employee " + i);
-                employee.setEmail("employee" + i + "@example.com");
+                employee.setName("Employee " + j + " of Department " + i);
+                employee.setEmail("employee" + j + "@department" + i + ".com");
+                employee.setDepartment(department);
                 employeeDAO.create(employee);
             }
+        }
+    }
 
-
+    @AfterAll
+    static void tearDown() {
+        HibernateConfig.shutdownTestEmf();
     }
 
     @Test
@@ -48,6 +55,11 @@ class EmployeeDAOTest {
 
     @Test
     void get() {
+        Set<Employee> eployees = employeeDAO.get();
+        eployees.forEach(e -> System.out.println(e.getName() + " is deployed in department: " + e.getDepartment().getName()));
+        int actual = eployees.size();
+        int expected = 12;
+        assertEquals(expected, actual);
     }
 
     @Test

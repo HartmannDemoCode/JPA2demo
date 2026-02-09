@@ -15,6 +15,7 @@
         <hibernate.version>6.2.4.Final</hibernate.version>
         <postgresql.version>42.6.0</postgresql.version>
         <junit.version>5.9.1</junit.version>
+        <testcontainers.version>1.18.0</testcontainers.version>
         <db.name>jpademo</db.name>
     </properties>
     <dependencies>
@@ -45,6 +46,18 @@
             <artifactId>lombok</artifactId>
             <version>1.18.34</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
