@@ -52,6 +52,74 @@ public class EmployeeDAO implements IDAO<Employee> {
         }
     }
 
+    public Employee updateDepartment(long empId, long deptId){
+        try(EntityManager em = emf.createEntityManager()){
+            Employee foundEmp = em.find(Employee.class, empId);
+            Department foundDept = em.find(Department.class, deptId);
+            if(foundEmp == null || foundDept == null)
+                throw new EntityNotFoundException("Either Employee, Department or both were not found");
+            em.getTransaction().begin();
+            foundEmp.setDepartment(foundDept);
+            em.getTransaction().commit();
+            return foundEmp;
+        }
+    }
+
+    /**
+     * Update an Employee from a detached object WITHOUT cascading.
+     *
+     * Rules:
+     * 1) Employee must have an ID and exist in DB (otherwise EntityNotFoundException)
+     * 2) If a Department is provided:
+     *    - If department.id == null  -> treat as NEW department, persist it
+     *    - If department.id != null  -> it MUST exist, otherwise EntityNotFoundException
+     * 3) Only non-null fields from empToBeUpdated are applied (patch update)
+     */
+    public Employee updateWithCheck(Employee incoming) {
+        if (incoming == null || incoming.getId() == null)
+            throw new IllegalArgumentException("Employee id required");
+
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            try {
+                Employee managed = requireEmployee(em, incoming.getId());
+
+                if (incoming.getDepartment() != null) {
+                    Department dept = resolveDepartment(em, incoming.getDepartment());
+                    managed.setDepartment(dept);
+                }
+
+                if (incoming.getName() != null) managed.setName(incoming.getName());
+                if (incoming.getEmail() != null) managed.setEmail(incoming.getEmail());
+
+                em.getTransaction().commit();
+                return managed;
+            } catch (RuntimeException e) {
+                em.getTransaction().rollback();
+                throw e;
+            }
+        }
+    }
+
+    private Employee requireEmployee(EntityManager em, Long id) {
+        Employee e = em.find(Employee.class, id);
+        if (e == null) throw new EntityNotFoundException("Employee not found: " + id);
+        return e;
+    }
+
+    private Department resolveDepartment(EntityManager em, Department incomingDept) {
+        Long id = incomingDept.getId();
+        if (id == null) {
+            em.persist(incomingDept);      // explicit persist (no cascade)
+            return incomingDept;
+        }
+        Department managed = em.find(Department.class, id);
+        if (managed == null) throw new EntityNotFoundException("Department not found: " + id);
+        return managed;
+    }
+
+
+
     @Override
     public Long delete(Employee e) {
         try(EntityManager em = emf.createEntityManager()){

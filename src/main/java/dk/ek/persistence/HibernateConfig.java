@@ -4,12 +4,8 @@ import dk.ek.utils.Utils;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import jakarta.persistence.EntityManagerFactory;
-import org.hibernate.SessionFactory;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
-import org.hibernate.cfg.Configuration;
 
 import java.util.Properties;
 
@@ -24,6 +20,13 @@ public class HibernateConfig {
 
     public static void setTestMode(boolean isTest) {
         HibernateConfig.isIntegrationTest = isTest;
+    }
+
+    public static EntityManagerFactory getEntityManagerFactoryForTest(){
+        setTestMode(true);
+        EntityManagerFactory testEmf = getEntityManagerFactory();
+        setTestMode(false);
+        return testEmf;
     }
 
     public static EntityManagerFactory getEntityManagerFactory() {
