@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class EmployeeDAOTest {
     private static EntityManagerFactory emf;
     private static IDAO<Employee> employeeDAO;
+    private static IJPADemo jpaDemo;
     private static DepartmentDAO departmentDAO;
     private final List<Employee> employees = new ArrayList<>();
 
@@ -23,6 +24,7 @@ class EmployeeDAOTest {
     static void setUp() {
         emf = HibernateConfig.getEntityManagerFactoryForTest();
         employeeDAO = new EmployeeDAO(emf);
+        jpaDemo = new EmployeeDAO(emf);
         departmentDAO = new DepartmentDAO(emf);
     }
 
@@ -93,7 +95,7 @@ class EmployeeDAOTest {
         patch.setEmail("patched@mail.com");
 
         // Act
-        Employee updated = employeeDAO.updateWithCheck(patch);
+        Employee updated = jpaDemo.updateWithCheck(patch);
 
         // Assert
         assertEquals("Patched Name", updated.getName());
@@ -125,7 +127,8 @@ class EmployeeDAOTest {
         patch.setDepartment(deptRef);
 
         // Act
-        Employee updated = employeeDAO.updateWithCheck(patch);
+
+        Employee updated = jpaDemo.updateWithCheck(patch);
 
         // Assert
         assertNotNull(updated.getDepartment());
@@ -148,7 +151,7 @@ class EmployeeDAOTest {
         int deptCountBefore = departmentDAO.get().size();
 
         // Act
-        Employee updated = employeeDAO.updateWithCheck(patch);
+        Employee updated = jpaDemo.updateWithCheck(patch);
 
         // Assert: employee now points to a department that has an id (was persisted)
         assertNotNull(updated.getDepartment());

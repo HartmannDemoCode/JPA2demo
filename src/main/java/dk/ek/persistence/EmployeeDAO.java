@@ -7,7 +7,7 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 
-public class EmployeeDAO implements IDAO<Employee> {
+public class EmployeeDAO implements IDAO<Employee>, IJPADemo{
     EntityManagerFactory emf;
     public EmployeeDAO(EntityManagerFactory _emf){
         this.emf = _emf;
@@ -52,6 +52,7 @@ public class EmployeeDAO implements IDAO<Employee> {
         }
     }
 
+    @Override
     public Employee updateDepartment(long empId, long deptId){
         try(EntityManager em = emf.createEntityManager()){
             Employee foundEmp = em.find(Employee.class, empId);
@@ -75,6 +76,7 @@ public class EmployeeDAO implements IDAO<Employee> {
      *    - If department.id != null  -> it MUST exist, otherwise EntityNotFoundException
      * 3) Only non-null fields from empToBeUpdated are applied (patch update)
      */
+    @Override
     public Employee updateWithCheck(Employee incoming) {
         if (incoming == null || incoming.getId() == null)
             throw new IllegalArgumentException("Employee id required");
